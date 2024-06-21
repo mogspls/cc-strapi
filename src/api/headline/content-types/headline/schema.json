@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "headlines",
+  "info": {
+    "singularName": "headline",
+    "pluralName": "headlines",
+    "displayName": "RSS_Headlines",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "link": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    }
+  }
+}

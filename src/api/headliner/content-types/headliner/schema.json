@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "headliners",
+  "info": {
+    "singularName": "headliner",
+    "pluralName": "headliners",
+    "displayName": "Headliner",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "link": {
+      "type": "string"
+    },
+    "featuredImage": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    }
+  }
+}
