@@ -899,9 +899,10 @@ export interface ApiHeadlinerHeadliner extends Schema.CollectionType {
   attributes: {
     title: Attribute.String;
     description: Attribute.Text;
-    link: Attribute.String;
+    link: Attribute.String & Attribute.Unique;
     thumbnail: Attribute.String;
     company: Attribute.String;
+    published: Attribute.Boolean & Attribute.DefaultTo<true>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -912,6 +913,73 @@ export interface ApiHeadlinerHeadliner extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::headliner.headliner',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiIndustryNewsIndustryNews extends Schema.CollectionType {
+  collectionName: 'industry_news_plural';
+  info: {
+    singularName: 'industry-news';
+    pluralName: 'industry-news-plural';
+    displayName: 'IndustryNews';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    title: Attribute.String;
+    description: Attribute.Text;
+    link: Attribute.String & Attribute.Unique;
+    thumbnail: Attribute.String;
+    company: Attribute.String;
+    published: Attribute.Boolean & Attribute.DefaultTo<true>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::industry-news.industry-news',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::industry-news.industry-news',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiRssIndustryRssIndustry extends Schema.CollectionType {
+  collectionName: 'rss_industries';
+  info: {
+    singularName: 'rss-industry';
+    pluralName: 'rss-industries';
+    displayName: 'RSS_industry';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    title: Attribute.String;
+    link: Attribute.String & Attribute.Unique;
+    enabled: Attribute.Boolean & Attribute.DefaultTo<true>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::rss-industry.rss-industry',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::rss-industry.rss-industry',
       'oneToOne',
       'admin::user'
     > &
@@ -941,6 +1009,8 @@ declare module '@strapi/types' {
       'api::announcement.announcement': ApiAnnouncementAnnouncement;
       'api::headline.headline': ApiHeadlineHeadline;
       'api::headliner.headliner': ApiHeadlinerHeadliner;
+      'api::industry-news.industry-news': ApiIndustryNewsIndustryNews;
+      'api::rss-industry.rss-industry': ApiRssIndustryRssIndustry;
     }
   }
 }

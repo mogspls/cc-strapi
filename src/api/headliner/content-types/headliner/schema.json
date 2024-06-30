@@ -13,19 +13,32 @@
   "pluginOptions": {},
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "unique": false,
+      "pluginOptions": {}
     },
     "description": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": {}
     },
     "link": {
-      "type": "string"
+      "type": "string",
+      "unique": true,
+      "pluginOptions": {}
     },
     "thumbnail": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {}
     },
     "company": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {}
+    },
+    "published": {
+      "type": "boolean",
+      "default": true,
+      "required": false,
+      "pluginOptions": {}
     }
   }
 }

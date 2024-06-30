@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "rss_industries",
+  "info": {
+    "singularName": "rss-industry",
+    "pluralName": "rss-industries",
+    "displayName": "RSS_industry",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "link": {
+      "type": "string",
+      "unique": true
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

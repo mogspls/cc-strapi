@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "industry_news_plural",
+  "info": {
+    "singularName": "industry-news",
+    "pluralName": "industry-news-plural",
+    "displayName": "IndustryNews"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "link": {
+      "type": "string",
+      "unique": true
+    },
+    "thumbnail": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
