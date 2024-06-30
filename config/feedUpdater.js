@@ -1,89 +1,105 @@
 "use strict";
-
 const Parser = require("rss-parser");
 
-// 1
-function diffInDays(date1, date2) {
-  const difference = Math.floor(date1) - Math.floor(date2);
-  return Math.floor(difference / 60 / 60 / 24);
-}
-
-// 2
-async function getNewFeedItemsFrom(feedUrl) {
-  const parser = new Parser({
-    customFields: {
-      item: ["media:content"],
-    },
-  });
-  const rss = await parser.parseURL(feedUrl);
-  const todaysDate = new Date().getTime() / 1000;
-  return rss.items.filter((item) => {
-    const blogPublishedDate = new Date(item.pubDate).getTime() / 1000;
-    return diffInDays(todaysDate, blogPublishedDate) === 0;
-  });
-}
-
-// async function getFeedUrls() {
-//   return await strapi.service("api::headline.headline").find();
-// }
-
-// 4
-async function getNewFeedItems() {
-  let allNewFeedItems = [];
-
-  const feeds = await strapi.service("api::headline.headline").find();
-
-  for (let i = 0; i < feeds.total; i++) {
-    // const { link } = await feeds.results[i];
-    // const feedItems = await getNewFeedItemsFrom(link);
-    // allNewFeedItems = [...allNewFeedItems, ...feedItems];
-    console.log(i)
-    console.log(feeds.results[i])
-  }
-
-  console.log("Done!")
-
-  return allNewFeedItems;
-}
-
-async function createNewsItem(item) {
-  const { title, contentSnippet: preview, link, creator, media } = item;
-  let featuredImage = null;
-
-  if (media && media["media:content"]) {
-    const imageUrl = media["media:content"]["$"].url;
-
-    const response = await strapi.plugins["upload"].services.upload.fetch({
-      url: imageUrl,
+module.exports = {
+  getHeadlinerfrom: async (url) => {
+    const parser = new Parser({
+      customFields: {
+        item: [
+          ["media:content", "contentThumbnail", { keepArray: false }],
+          ["media:content", "thumbnail", { keepArray: false }],
+        ],
+      },
     });
 
-    if (response && response.length > 0) {
-      featuredImage = response[0];
-    }
-  }
+    const diffInDays = (today, pubdate) => {
+      const difference = Math.floor(today) - Math.floor(pubdate);
+      return Math.floor(difference / 60 / 60 / 24);
+    };
 
-  const newsItem = {
-    title,
-    preview,
-    link,
-    creator,
-    sponsored: false,
-    featuredImage,
-  };
+    const rss = await parser.parseURL(url);
+    //  Format today's date
+    const today = new Date().getTime() / 1000;
+    return rss.items.filter((item) => {
+      const blogPublishedDate = new Date(item.pubDate).getTime() / 1000;
+      return diffInDays(today, blogPublishedDate) === 0;
+    });
+  },
+  createNewsItem: async (item) => {
 
-  await strapi.service('api::headliners.headliners').create(newsItem);
-}
+    const getImgSrc = (descriptionImg) => {
+      const imgSrcMatch = descriptionImg.match(/<img[^>]+src="([^">]+)"/);
+      return imgSrcMatch ? imgSrcMatch[1] : null;
+    };
 
-// 5
+    const entry = await strapi.entityService.create(
+      "api::headliner.headliner",
+      {
+        data: {
+          title: item.title,
+          description: item.content,
+          link: item.link,
+          thumbnail: item.thumbnail
+            ? item.thumbnail["$"].url
+            : item.contentThumbnail
+            ? item.contentThumbnail[0].url
+            : item.content.toString().match(/<img[^>]+src="([^">]+)"/)[1]
+            ? getImgSrc(item.content)
+            : "",
+          company: item.company,
+        },
+      }
+    );
+    console.log(entry);
+  },
+  main: async function () {
+    let allNewFeedItems = [];
+    let results = [];
+    const response = await strapi.service("api::headline.headline").find();
 
-// 6
-module.exports = {
-  main: async () => {
-    const feedItems = await getNewFeedItems();
+    // for (let i = 0; i < response.pagination.total; i++) {
+    //   const feedItems = await this.getHeadlinerfrom(response.results[i].link);
 
-    for (let i = 0; i < feedItems.length; i++) {
-      const item = feedItems[i];
-      await createNewsItem(item);
+    //   const feed = feedItems[i].results.forEach((item) => {
+    //     item.company = response.results[i].title;
+    //   })
+
+    //   console.log(feed.results[i]);
+
+    // allNewFeedItems.push({
+    //   company: response.results[i].title,
+    //   results: [...feedItems],
+    // });
+
+    // await this.createNewsItem(
+    //   ...allNewFeedItems[i].results,
+    //   allNewFeedItems[i].company
+    // );
+    // }
+
+    for (let i = 0; i < response.pagination.total; i++) {
+      const feed = await this.getHeadlinerfrom(response.results[i].link);
+
+      allNewFeedItems.push({
+        company: response.results[i].title,
+        results: [...feed],
+      });
+
+      allNewFeedItems[i].results.forEach(async (item) => {
+        // @ts-ignore
+        response.results[i].title = item.company;
+      });
+
+      const output = results.concat(...allNewFeedItems[i].results);
+
+      // console.log(output)
+      // console.log(
+      //   `${response.results[i].link}: ${allNewFeedItems[i].results.length}`
+      // );
+
+      console.log(output)
+
+      return output
     }
   },
 };

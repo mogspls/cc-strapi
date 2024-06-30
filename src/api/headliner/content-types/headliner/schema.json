@@ -21,15 +21,11 @@
     "link": {
       "type": "string"
     },
-    "featuredImage": {
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ],
-      "type": "media",
-      "multiple": false
+    "thumbnail": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
     }
   }
 }

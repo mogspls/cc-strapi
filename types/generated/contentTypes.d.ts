@@ -900,7 +900,8 @@ export interface ApiHeadlinerHeadliner extends Schema.CollectionType {
     title: Attribute.String;
     description: Attribute.Text;
     link: Attribute.String;
-    featuredImage: Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    thumbnail: Attribute.String;
+    company: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
