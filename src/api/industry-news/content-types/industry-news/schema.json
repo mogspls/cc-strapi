@@ -4,10 +4,11 @@
   "info": {
     "singularName": "industry-news",
     "pluralName": "industry-news-plural",
-    "displayName": "IndustryNews"
+    "displayName": "IndustryNews",
+    "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {

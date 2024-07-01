@@ -121,4 +121,10 @@ module.exports = {
       );
     }
   },
+  deleteAllPostsFrom: async (model) => {
+    const res = await strapi.entityService
+  },
+  deleteAllPosts: async () => {
+    const res = await strapi.entityService.findMany("api::headliner.headliner");
+  }
 };

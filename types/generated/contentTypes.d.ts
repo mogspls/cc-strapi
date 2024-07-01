@@ -926,9 +926,10 @@ export interface ApiIndustryNewsIndustryNews extends Schema.CollectionType {
     singularName: 'industry-news';
     pluralName: 'industry-news-plural';
     displayName: 'IndustryNews';
+    description: '';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     title: Attribute.String;
@@ -939,7 +940,6 @@ export interface ApiIndustryNewsIndustryNews extends Schema.CollectionType {
     published: Attribute.Boolean & Attribute.DefaultTo<true>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
-    publishedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       'api::industry-news.industry-news',
       'oneToOne',

@@ -5,11 +5,18 @@ const tasks = require("./tasks")
 module.exports = {
   createPost: {
     task: async ({strapi}) => {
-      console.log("Running Headliners RSS Feed CRON")
       await tasks.updateFeed();
     },
     options: {
-      rule: "1 * * * * *"
+      rule: "*/15 * * * *"
+    }
+  },
+  deleteAllPosts: {
+    task: async({strapi}) => {
+      await tasks.deleteAllPosts();
+    },
+    options: {
+      rule: "59 11 * * *"
     }
   }
 }; 
