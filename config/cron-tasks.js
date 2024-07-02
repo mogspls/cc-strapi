@@ -8,7 +8,7 @@ module.exports = {
       await tasks.updateFeed();
     },
     options: {
-      rule: "*/15 * * * *"
+      rule: "0 15 * * * *"
     }
   },
   deleteAllPosts: {
@@ -16,7 +16,7 @@ module.exports = {
       await tasks.deleteAllPosts();
     },
     options: {
-      rule: "59 11 * * *"
+      rule: "* 0 0 * * *"
     }
   }
-}; 
+};

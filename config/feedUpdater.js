@@ -1,5 +1,7 @@
 "use strict";
 const { JSDOM } = require("jsdom");
+const { DOMParser, XMLSerializer } = require('xmldom');
+const { deleteAllPosts } = require("./cron-tasks");
 const entities = require("entities");
 
 module.exports = {
@@ -35,16 +37,43 @@ module.exports = {
       return match ? match[1] : null;
     };
 
+    const checkXMLValidity = (xmlString) => {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlString, "application/xml");
+
+        // Check for parsing errors
+        if (doc.getElementsByTagName("parsererror").length > 0) {
+          console.log("Invalid XML detected:");
+          // const error = doc.getElementsByTagName("parsererror")[0];
+          // console.log(error.textContent);
+
+        } else {
+          // Serialize the XML document back to a string and return it
+          const serializer = new XMLSerializer();
+          const xmlString = serializer.serializeToString(doc);
+          // console.log("XML is valid.");
+          // console.log("Serialized XML:", xmlString);
+          return xmlString;
+        }
+      } catch (error) {
+        console.error("Error while parsing XML:", error.message);
+      }
+    };
+
     const removeAllHtmlTags = (content) => {
       const withoutImgTags = content.replace(/<img[^>]*>/g, "");
       const withoutBrTags = withoutImgTags.replace(/<br\s*\/?>/g, "");
       const withoutHtmlTags = withoutBrTags.replace(/<\/?[^>]+(>|$)/g, "");
       const withoutNewlines = withoutHtmlTags.replace(/\n/g, "");
-      return entities.decodeHTML(withoutNewlines);
+      return entities.decode(withoutNewlines);
     };
 
     const combinedNews = xmlDataArray.reduce((acc, xmlData, index) => {
-      const xml = parseXMLData(xmlData);
+
+      const validXML = checkXMLValidity(xmlData);
+
+      const xml = parseXMLData(validXML);
       const items = xml.querySelectorAll("item");
 
       const itemsWithSource = Array.from(items).map((item) => {
@@ -80,10 +109,14 @@ module.exports = {
       });
 
       if (existingEntry.length === 0) {
+        // Log the data being posted to help identify issues
+        // console.log("Creating new post with data:", data);
+
         // If the post doesn't exist, create a new one
         const entry = await strapi.entityService.create(model, {
           data,
         });
+
         console.log(`Created new post: ${entry.title}`);
       } else {
         duplicateCounter.count += 1; // Increment the duplicate counter
@@ -92,16 +125,38 @@ module.exports = {
       console.error(`Error creating post: ${error.message}`);
     }
   },
+  deleteAllPosts: async () => {
+    const headliners = await strapi.entityService.findMany(
+      "api::headliner.headliner"
+    );
+
+    const industrynews = await strapi.entityService.findMany(
+      "api::industry-news.industry-news"
+    );
+
+    for (const item of headliners) {
+      await strapi.entityService.delete("api::headliner.headliner", item.id);
+    }
+
+    for (const item of industrynews) {
+      await strapi.entityService.delete(
+        "api::industry-news.industry-news",
+        item.id
+      );
+    }
+
+    console.log("Deleted all posts. Refreshing everything.");
+  },
   main: async function () {
     const duplicateCounter = { count: 0 }; // Initialize the duplicate counter
     const headlinesRSS = await this.fetchData("api::headline.headline");
 
     for (const item of headlinesRSS) {
-      const uniqueFilter = { link: item.link };
+      const duplicateLinks = { link: item.link };
       await this.createNewsItem(
         "api::headliner.headliner",
         item,
-        uniqueFilter,
+        duplicateLinks,
         duplicateCounter
       );
     }
@@ -109,7 +164,9 @@ module.exports = {
     console.log(`Number of duplicate posts: ${duplicateCounter.count}`);
 
     // // Industry News
-    const industryNewsRSS = await this.fetchData("api::rss-industry.rss-industry");
+    const industryNewsRSS = await this.fetchData(
+      "api::rss-industry.rss-industry"
+    );
 
     for (const item of industryNewsRSS) {
       const uniqueFilter = { link: item.link };
@@ -121,10 +178,4 @@ module.exports = {
       );
     }
   },
-  deleteAllPostsFrom: async (model) => {
-    const res = await strapi.entityService
-  },
-  deleteAllPosts: async () => {
-    const res = await strapi.entityService.findMany("api::headliner.headliner");
-  }
 };
