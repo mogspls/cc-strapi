@@ -4,6 +4,13 @@ const { DOMParser, XMLSerializer } = require('xmldom');
 const { deleteAllPosts } = require("./cron-tasks");
 const entities = require("entities");
 
+const convertToPHT = (date) => {
+  const utcDate = new Date(date);
+  const phtOffset = 8 * 60; // Offset in minutes
+  const phtDate = new Date(utcDate.getTime() + phtOffset * 60000);
+  return phtDate;
+};
+
 module.exports = {
   fetchData: async (api) => {
     const res = await strapi.service(api).find();
@@ -76,7 +83,7 @@ module.exports = {
       const xml = parseXMLData(validXML);
       const items = xml.querySelectorAll("item");
 
-      const itemsWithSource = Array.from(items).map((item) => {
+      const itemsWithSource = Array.from(items).slice(0, 3).map((item) => { // Limit to first 3 items
         const descriptionContent =
           item.querySelector("description").textContent;
 
@@ -87,12 +94,16 @@ module.exports = {
           item.getElementsByTagName("media:content")[0]?.getAttribute("url") ||
           extractImageSrc(descriptionContent);
 
+        const pubDate = item.querySelector("pubDate").textContent;
+        const createdAtPHT = convertToPHT(new Date(pubDate)).toISOString();
+
         return {
           title: item.querySelector("title").textContent,
           description: removeAllHtmlTags(descriptionContent),
           link: item.querySelector("link").textContent,
           thumbnail: thumbnail,
           company: sources[index].name,
+          createdAt: createdAtPHT, // Add the converted date here
         };
       });
 
@@ -149,6 +160,8 @@ module.exports = {
   },
   main: async function () {
     const duplicateCounter = { count: 0 }; // Initialize the duplicate counter
+
+    // Fetch the first 3 posts from each feed
     const headlinesRSS = await this.fetchData("api::headline.headline");
 
     for (const item of headlinesRSS) {
@@ -163,7 +176,7 @@ module.exports = {
 
     console.log(`Number of duplicate posts: ${duplicateCounter.count}`);
 
-    // // Industry News
+    // Industry News
     const industryNewsRSS = await this.fetchData(
       "api::rss-industry.rss-industry"
     );

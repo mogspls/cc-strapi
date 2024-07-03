@@ -804,6 +804,7 @@ export interface ApiAgencyAgency extends Schema.CollectionType {
       Attribute.Required;
     Title: Attribute.String & Attribute.Required;
     Video: Attribute.Media<'videos'>;
+    description: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -834,7 +835,7 @@ export interface ApiAnnouncementAnnouncement extends Schema.CollectionType {
     draftAndPublish: true;
   };
   attributes: {
-    post: Attribute.Blocks;
+    post: Attribute.Text;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -955,6 +956,35 @@ export interface ApiIndustryNewsIndustryNews extends Schema.CollectionType {
   };
 }
 
+export interface ApiInsightInsight extends Schema.SingleType {
+  collectionName: 'insights';
+  info: {
+    singularName: 'insight';
+    pluralName: 'insights';
+    displayName: 'Insights';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Banners: Attribute.Media<'images' | 'files' | 'videos' | 'audios', true>;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::insight.insight',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::insight.insight',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiRssIndustryRssIndustry extends Schema.CollectionType {
   collectionName: 'rss_industries';
   info: {
@@ -1010,6 +1040,7 @@ declare module '@strapi/types' {
       'api::headline.headline': ApiHeadlineHeadline;
       'api::headliner.headliner': ApiHeadlinerHeadliner;
       'api::industry-news.industry-news': ApiIndustryNewsIndustryNews;
+      'api::insight.insight': ApiInsightInsight;
       'api::rss-industry.rss-industry': ApiRssIndustryRssIndustry;
     }
   }
